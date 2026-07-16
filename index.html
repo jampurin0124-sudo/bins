@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html><head><title>Trash Bin Dashboard</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta charset="utf-8">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,sans-serif;background:#1a1a2e;color:#fff;min-height:100vh;padding:20px;display:flex;flex-direction:column;align-items:center}
+h1{font-size:1.8em;margin-bottom:30px;opacity:0.8}
+.dashboard{display:flex;gap:40px;flex-wrap:wrap;justify-content:center}
+.monitor{display:flex;flex-direction:column;align-items:center;padding:25px;background:#16213e;border-radius:20px;min-width:260px}
+.monitor h2{font-size:1.1em;margin-bottom:15px;opacity:0.7}
+.container{display:flex;align-items:center;gap:25px}
+.bin{width:70px;height:180px;border:3px solid #fff;border-radius:0 0 12px 12px;position:relative;overflow:hidden;border-top:none}
+.bin::before{content:'';position:absolute;top:-6px;left:-8px;right:-8px;height:10px;background:#fff;border-radius:4px}
+.fill{position:absolute;bottom:0;left:0;right:0;transition:height 0.5s ease,background 0.5s ease}
+.info{text-align:center}
+.percent{font-size:3em;font-weight:bold;transition:color 0.5s ease}
+.distance{font-size:0.9em;opacity:0.6;margin-top:6px}
+.status{font-size:1.1em;margin-top:10px;padding:5px 14px;border-radius:14px;font-weight:bold}
+.green{background:#00c853;color:#000}
+.amber{background:#ff9100;color:#000}
+.red{background:#ff1744;color:#fff}
+.offline{background:#555;color:#fff}
+</style></head><body>
+<h1>Trash Bin Dashboard</h1>
+<div class="dashboard" id="bins"></div>
+<script>
+const bins=[
+  {name:'Bin 1',url:'https://raspberrypi.tailc6b4d4.ts.net/data'},
+  {name:'Bin 2',url:'https://raspberrypi2.tailc6b4d4.ts.net/data'}
+];
+function getColor(pct){if(pct<50)return{color:'#00c853',label:'GREEN',cls:'green'};if(pct<80)return{color:'#ff9100',label:'AMBER',cls:'amber'};return{color:'#ff1744',label:'RED',cls:'red'};}
+function createBin(id,name){return `<div class="monitor"><h2>${name}</h2><div class="container"><div class="bin"><div class="fill" id="fill${id}"></div></div><div class="info"><div class="percent" id="pct${id}">--</div><div class="distance" id="dist${id}">--</div><div class="status" id="status${id}">...</div></div></div></div>`;}
+document.getElementById('bins').innerHTML=bins.map((b,i)=>createBin(i+1,b.name)).join('');
+async function poll(){
+  for(let i=0;i<bins.length;i++){
+    const id=''+(i+1);
+    try{
+      const controller=new AbortController();
+      const timeout=setTimeout(()=>controller.abort(),5000);
+      const r=await fetch(bins[i].url,{signal:controller.signal});
+      clearTimeout(timeout);
+      const j=await r.json();
+      const pct=j.fill;const{color,label,cls}=getColor(pct);
+      document.getElementById('pct'+id).textContent=pct+'%';
+      document.getElementById('pct'+id).style.color=color;
+      document.getElementById('dist'+id).textContent=j.cm+' cm';
+      document.getElementById('fill'+id).style.height=pct+'%';
+      document.getElementById('fill'+id).style.background=color;
+      const st=document.getElementById('status'+id);st.textContent=label;st.className='status '+cls;
+    }catch(e){
+      document.getElementById('pct'+id).textContent='--';
+      document.getElementById('pct'+id).style.color='#555';
+      document.getElementById('dist'+id).textContent='offline';
+      document.getElementById('fill'+id).style.height='0%';
+      const st=document.getElementById('status'+id);st.textContent='OFFLINE';st.className='status offline';
+    }
+  }
+}
+setInterval(poll,3000);poll();
+</script></body></html>
