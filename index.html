@@ -28,7 +28,8 @@ h1{font-size:1.8em;margin-bottom:30px;opacity:0.8}
 const bins=[
   {name:'Bin 1',url:'https://raspberrypi.tailc6b4d4.ts.net/data'},
   {name:'Bin 2',url:'https://raspberrypi2.tailc6b4d4.ts.net/data'},
-  {name:'Bin 3',url:'https://raspberrypi3.tailc6b4d4.ts.net/data'}
+  {name:'Bin 3',url:'https://raspberrypi3.tailc6b4d4.ts.net/data'},
+  {name:'Bin 4',url:'https://raspberrypi4.tailc6b4d4.ts.net/data'}
 ];
 function getColor(pct){if(pct<50)return{color:'#00c853',label:'GREEN',cls:'green'};if(pct<80)return{color:'#ff9100',label:'AMBER',cls:'amber'};return{color:'#ff1744',label:'RED',cls:'red'};}
 function createBin(id,name){return `<div class="monitor"><h2>${name}</h2><div class="container"><div class="bin"><div class="fill" id="fill${id}"></div></div><div class="info"><div class="percent" id="pct${id}">--</div><div class="distance" id="dist${id}">--</div><div class="status" id="status${id}">...</div></div></div></div>`;}
